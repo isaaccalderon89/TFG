@@ -1,0 +1,28 @@
+package com.curso.cazadoreslibros.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.curso.cazadoreslibros.model.Libro;
+
+@Controller
+@RequestMapping("/libros")
+public class LibroController {
+	
+	@GetMapping("")
+	public String Show() {
+		return "libros/show";
+	}
+	@GetMapping("/create")
+	public String create() {
+		return "libros/create";
+	}
+	@PostMapping("/save")
+	public String save(Libro libro) {
+		System.out.println("*** PROBANDO EL METODO SAVE ***");
+		return "redirect:/create";
+	}
+
+}

@@ -1,0 +1,43 @@
+package com.curso.cazadoreslibros.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.curso.cazadoreslibros.model.Libro;
+
+@Service
+public class LibroServiceImpl implements LibroService {
+
+	@Override
+	public Libro save(Libro libro) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Optional<Libro> get(Integer id) {
+		// TODO Auto-generated method stub
+		return Optional.empty();
+	}
+
+	@Override
+	public void update(Libro libro) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(Integer id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Libro> findAll() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

@@ -1,0 +1,39 @@
+package com.curso.cazadoreslibros.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.curso.cazadoreslibros.model.Libro;
+import com.curso.cazadoreslibros.model.Usuario;
+import com.curso.cazadoreslibros.service.LibroService;
+
+@Controller
+@RequestMapping("/libros")
+public class LibroController {
+	
+	@Autowired
+	private LibroService libroService;
+	
+	@GetMapping("")
+	public String Show(Model model) {
+		model.addAttribute("libros", libroService.findAll());
+		return "libros/show";
+	}
+	@GetMapping("/create")
+	public String create() {
+		return "libros/create";
+	}
+	@PostMapping("/save")
+	public String save(Libro libro) {
+		System.out.println("*** PROBANDO EL METODO SAVE ***");
+		Usuario u = new Usuario(1, "","","","","","","");
+		libro.setUsuario(u);
+		libroService.save(libro);
+		return "redirect:/libros";
+	}
+
+}
