@@ -1,0 +1,5 @@
+package com.curso.cazadoreslibros.service;
+
+public interface DetalleOrdenService {
+
+}

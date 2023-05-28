@@ -1,0 +1,33 @@
+package com.curso.cazadoreslibros.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.curso.cazadoreslibros.service.LibroService;
+
+
+
+@Controller
+@RequestMapping("/")
+public class HomeController {
+	
+	@Autowired
+	private LibroService libroService;
+	
+	@GetMapping("")
+	public String home(Model model) {
+		System.out.println("*** PROBANDO LA SESION DEL USUARIO ***");
+		model.addAttribute("libros", libroService.findAll());
+		return "usuario/home";
+	}
+	@GetMapping("librohome/{id}")
+	public String libroHome(@PathVariable Integer id) {
+		System.out.println("*** PROBANDO EL METODO LIBROHOME ***");
+		return "usuario/librohome";
+	}
+
+}
