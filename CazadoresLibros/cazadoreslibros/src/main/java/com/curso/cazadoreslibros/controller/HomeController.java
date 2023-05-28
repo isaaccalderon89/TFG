@@ -1,8 +1,12 @@
 package com.curso.cazadoreslibros.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +21,9 @@ import com.curso.cazadoreslibros.model.DetalleOrden;
 import com.curso.cazadoreslibros.model.Libro;
 import com.curso.cazadoreslibros.model.Orden;
 import com.curso.cazadoreslibros.model.Usuario;
+import com.curso.cazadoreslibros.service.DetalleOrdenService;
 import com.curso.cazadoreslibros.service.LibroService;
+import com.curso.cazadoreslibros.service.OrdenService;
 import com.curso.cazadoreslibros.service.UsuarioService;
 
 
@@ -32,14 +38,23 @@ public class HomeController {
 	@Autowired
 	private UsuarioService usuarioService;
 	
+	@Autowired
+	private OrdenService ordenService;
+	
+	@Autowired
+	private DetalleOrdenService detalleOrdenService;
+	
 	List<DetalleOrden> detalles = new ArrayList<DetalleOrden>();
 	
 	Orden orden = new Orden();
 	
 	@GetMapping("")
-	public String home(Model model) {
-		System.out.println("*** PROBANDO LA SESION DEL USUARIO ***");
+	public String home(Model model, HttpSession session) {
+		System.out.println("*** PROBANDO LA SESION DEL USUARIO (HOMECONTROLLER) ***");
+		
 		model.addAttribute("libros", libroService.findAll());
+		model.addAttribute("sesion", session.getAttribute("idUsuario"));
+		
 		return "usuario/home";
 	}
 	
@@ -108,17 +123,19 @@ public class HomeController {
 	}
 	
 	@GetMapping("/getCart")
-	public String getCart(Model model) {
+	public String getCart(Model model, HttpSession session) {
 		
 		model.addAttribute("cart", detalles);
 		model.addAttribute("orden", orden);
+		
+		model.addAttribute("session", session.getAttribute("idUsuario"));
 		return "usuario/carrito";
 	}
 	
 	@GetMapping("/order")
-	public String order(Model model) {
+	public String order(Model model, HttpSession session) {
 		
-		Usuario usuario = usuarioService.findById(1).get();
+		Usuario usuario = usuarioService.findById(Integer.parseInt(session.getAttribute("idUsuario").toString())).get();
 		
 		model.addAttribute("cart", detalles);
 		model.addAttribute("orden", orden);
@@ -126,6 +143,39 @@ public class HomeController {
 
 		
 		return "usuario/resumenorden";
+	}
+	
+	@GetMapping("/saveOrder")
+	public String saveOrder(HttpSession session) {
+		Date fechaCreacion = new Date();
+		orden.setFechaCreacion(fechaCreacion);
+		orden.setNumero(ordenService.genNumOrden());
+		
+		Usuario usuario = usuarioService.findById(Integer.parseInt(session.getAttribute("idUsuario").toString())).get();
+		orden.setUsuario(usuario);
+		ordenService.save(orden);
+		
+		
+		for(DetalleOrden dt:detalles) {
+			dt.setOrden(orden);
+			detalleOrdenService.save(dt);
+		}
+		
+		
+		orden = new Orden();
+		detalles.clear();
+		
+		
+		return "redirect:/";
+		
+	}
+	
+	@PostMapping("/search")
+	public String searchProduct(@RequestParam String titulo, Model model) {
+		System.out.println("**** PROBANDO LA BUSQUEDA*****");
+		List<Libro> libros = libroService.findAll().stream().filter(p -> p.getTitulo().contains(titulo)).collect(Collectors.toList());
+		model.addAttribute("libros", libros);
+		return "usuario/home";
 	}
 
 }

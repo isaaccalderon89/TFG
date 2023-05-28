@@ -3,6 +3,8 @@ package com.curso.cazadoreslibros.controller;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +19,7 @@ import com.curso.cazadoreslibros.model.Libro;
 import com.curso.cazadoreslibros.model.Usuario;
 import com.curso.cazadoreslibros.service.LibroService;
 import com.curso.cazadoreslibros.service.UploadFileService;
+import com.curso.cazadoreslibros.service.UsuarioService;
 
 @Controller
 @RequestMapping("/libros")
@@ -27,6 +30,9 @@ public class LibroController {
 
 	@Autowired
 	private UploadFileService upload;
+	
+	@Autowired
+	private UsuarioService usuarioService;
 
 	@GetMapping("")
 	public String Show(Model model) {
@@ -40,9 +46,11 @@ public class LibroController {
 	}
 
 	@PostMapping("/save")
-	public String save(Libro libro, @RequestParam("img") MultipartFile file) throws IOException {
+	public String save(Libro libro, @RequestParam("img") MultipartFile file, HttpSession session) throws IOException {
 		System.out.println("*** PROBANDO EL METODO SAVE ***");
-		Usuario u = new Usuario(1, "", "", "", "", "", "", "");
+		
+		
+		Usuario u = usuarioService.findById(Integer.parseInt(session.getAttribute("idUsuario").toString())).get();
 		libro.setUsuario(u);
 
 		// imagen

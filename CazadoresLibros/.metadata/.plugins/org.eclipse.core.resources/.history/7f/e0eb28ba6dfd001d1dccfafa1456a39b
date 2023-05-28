@@ -1,0 +1,22 @@
+package com.curso.cazadoreslibros.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.curso.cazadoreslibros.service.UsuarioService;
+
+@Controller
+@RequestMapping("/usuario")
+public class UsuarioController {
+	
+	@Autowired
+	private UsuarioService usuarioService;
+	
+	@GetMapping("/registro")
+	public String create() {
+		return "usuario/registro";
+	}
+
+}

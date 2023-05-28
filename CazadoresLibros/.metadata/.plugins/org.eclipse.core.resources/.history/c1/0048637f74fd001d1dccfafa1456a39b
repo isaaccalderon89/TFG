@@ -1,0 +1,174 @@
+package com.curso.cazadoreslibros.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.curso.cazadoreslibros.model.DetalleOrden;
+import com.curso.cazadoreslibros.model.Libro;
+import com.curso.cazadoreslibros.model.Orden;
+import com.curso.cazadoreslibros.model.Usuario;
+import com.curso.cazadoreslibros.service.DetalleOrdenService;
+import com.curso.cazadoreslibros.service.LibroService;
+import com.curso.cazadoreslibros.service.OrdenService;
+import com.curso.cazadoreslibros.service.UsuarioService;
+
+
+
+@Controller
+@RequestMapping("/")
+public class HomeController {
+	
+	@Autowired
+	private LibroService libroService;
+	
+	@Autowired
+	private UsuarioService usuarioService;
+	
+	@Autowired
+	private OrdenService ordenService;
+	
+	@Autowired
+	private DetalleOrdenService detalleOrdenService;
+	
+	List<DetalleOrden> detalles = new ArrayList<DetalleOrden>();
+	
+	Orden orden = new Orden();
+	
+	@GetMapping("")
+	public String home(Model model) {
+		System.out.println("*** PROBANDO LA SESION DEL USUARIO ***");
+		model.addAttribute("libros", libroService.findAll());
+		return "usuario/home";
+	}
+	
+	@GetMapping("librohome/{id}")
+	public String libroHome(@PathVariable Integer id, Model model) {
+		Libro libro = new Libro();
+		Optional<Libro> libroOptional = libroService.get(id);
+		libro = libroOptional.get();
+		model.addAttribute("libro", libro);
+		System.out.println("**** PASANDO POR EL LIBROHOME ****");
+		return "usuario/librohome";
+	}
+	
+	@PostMapping("/cart")
+	public String addCart(@RequestParam Integer id, @RequestParam Integer cantidad, Model model) {
+		DetalleOrden detalleOrden = new DetalleOrden();
+		Libro libro = new Libro();
+		double sumaTotal = 0;
+		
+		Optional<Libro> optionalLibro = libroService.get(id);
+		System.out.println("Producto añadido id: " + id);
+		System.out.println("Producto añadido cantidad: " + cantidad);
+		
+		libro = optionalLibro.get();
+		detalleOrden.setCantidad(cantidad);
+		detalleOrden.setPrecio(libro.getPrecio());
+		detalleOrden.setTitulo(libro.getTitulo());
+		detalleOrden.setTotal(libro.getPrecio()*cantidad);
+		detalleOrden.setLibro(libro);
+		
+		Integer idLibro=libro.getId();
+		boolean ingresado = detalles.stream().anyMatch(p -> p.getLibro().getId()==idLibro);
+		
+		if(!ingresado) {
+			detalles.add(detalleOrden);
+		}
+		
+		sumaTotal = detalles.stream().mapToDouble(dt -> dt.getTotal()).sum();
+		
+		orden.setTotal(sumaTotal);
+		model.addAttribute("cart", detalles);
+		model.addAttribute("orden", orden);
+		
+		return "usuario/carrito";
+	}
+	
+	@GetMapping("/delete/cart/{id}")
+	public String deleteLibroCart(@PathVariable Integer id, Model model) {
+		List<DetalleOrden> ordenesNueva = new ArrayList<DetalleOrden>();
+		for (DetalleOrden detalleOrden : detalles) {
+			if (detalleOrden.getLibro().getId() != id) {
+				ordenesNueva.add(detalleOrden);
+			}
+		}
+		
+		detalles = ordenesNueva;
+
+		double sumaTotal = 0;
+		sumaTotal = detalles.stream().mapToDouble(dt -> dt.getTotal()).sum();
+
+		orden.setTotal(sumaTotal);
+		model.addAttribute("cart", detalles);
+		model.addAttribute("orden", orden);
+
+		return "usuario/carrito";
+	}
+	
+	@GetMapping("/getCart")
+	public String getCart(Model model) {
+		
+		model.addAttribute("cart", detalles);
+		model.addAttribute("orden", orden);
+		return "usuario/carrito";
+	}
+	
+	@GetMapping("/order")
+	public String order(Model model) {
+		
+		Usuario usuario = usuarioService.findById(1).get();
+		
+		model.addAttribute("cart", detalles);
+		model.addAttribute("orden", orden);
+		model.addAttribute("usuario", usuario);
+
+		
+		return "usuario/resumenorden";
+	}
+	
+	@GetMapping("/saveOrder")
+	public String saveOrder() {
+		Date fechaCreacion = new Date();
+		orden.setFechaCreacion(fechaCreacion);
+		orden.setNumero(ordenService.genNumOrden());
+		
+		Usuario usuario = usuarioService.findById(1).get();
+		orden.setUsuario(usuario);
+		ordenService.save(orden);
+		
+		
+		for(DetalleOrden dt:detalles) {
+			dt.setOrden(orden);
+			detalleOrdenService.save(dt);
+		}
+		
+		
+		orden = new Orden();
+		detalles.clear();
+		
+		
+		return "redirect:/";
+		
+	}
+	
+	@PostMapping("/search")
+	public String searchProduct(@RequestParam String titulo, Model model) {
+		System.out.println("**** PROBANDO LA BUSQUEDA*****");
+		List<Libro> libros = libroService.findAll().stream().filter(p -> p.getTitulo().contains(titulo)).collect(Collectors.toList());
+		model.addAttribute("libros", libros);
+		return "usuario/home";
+	}
+
+}
