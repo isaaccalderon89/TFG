@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -67,11 +68,28 @@ public class UsuarioController {
 	public String obtenerCompras(Model model, HttpSession session) {
 		model.addAttribute("session", session.getAttribute("idUsuario"));
 		
-		//Usuario usuario = usuarioService.findById(Integer.parseInt(session.getAttribute("idUsuario").toString())).get();
-		//List<Orden> ordenes = ordenService.findByUsuario(usuario);
+		Usuario usuario = usuarioService.findById(Integer.parseInt(session.getAttribute("idUsuario").toString())).get();
+		List<Orden> ordenes = ordenService.findByUsuario(usuario);
 		
-		//model.addAttribute("ordenes", ordenes);
+		model.addAttribute("ordenes", ordenes);
 		return "usuario/compras";
+	}
+	
+	@GetMapping("/detalle/{id}")
+	public String detalleCompra(@PathVariable Integer id, HttpSession session, Model model) {
+
+		Optional<Orden> orden=ordenService.findById(id);
+		
+		model.addAttribute("detalles", orden.get().getDetalle());
+
+		model.addAttribute("sesion", session.getAttribute("idusuario"));
+		return "usuario/detallecompra";
+	}
+	
+	@GetMapping("/cerrar")
+	public String cerrarSesion(HttpSession session) {
+		session.removeAttribute("idUsuario");
+		return "redirect:/";
 	}
 
 }
