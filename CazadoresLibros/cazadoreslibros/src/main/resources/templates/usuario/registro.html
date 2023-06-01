@@ -25,7 +25,7 @@
             background-size: cover;
         }
     </style>
-
+<script type="text/javascript" src="static/js/validaciones.js"></script>
 
 </head>
 
@@ -65,7 +65,7 @@
         </div>
       </div>
     </div>
-    <form th:action="@{/usuario/save}" method="post">
+    <form th:action="@{/usuario/save}" method="post" id="formRegistro">
       <div class="form-group">
         <label for="nombres">Nombre:</label> <input type="text"
           class="form-control" id="nombre" name="nombre" required
