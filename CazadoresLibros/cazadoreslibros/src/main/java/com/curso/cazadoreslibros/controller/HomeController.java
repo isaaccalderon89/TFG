@@ -171,11 +171,11 @@ public class HomeController {
 	}
 	
 	@PostMapping("/search")
-	public String searchProduct(@RequestParam String titulo, Model model) {
-		System.out.println("**** PROBANDO LA BUSQUEDA*****");
-		List<Libro> libros = libroService.findAll().stream().filter(p -> p.getTitulo().contains(titulo)).collect(Collectors.toList());
-		model.addAttribute("libros", libros);
+	public String searchProduct(@RequestParam String nombre, Model model) {
+		List<Libro> libros= libroService.findAll().stream().filter( p -> p.getTitulo().contains(nombre)).collect(Collectors.toList());
+		model.addAttribute("libros", libros);		
 		return "usuario/home";
 	}
+
 
 }
